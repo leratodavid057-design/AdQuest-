@@ -1,35 +1,28 @@
+
 import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { 
-  Download, 
   Zap, 
   Loader2, 
   TrendingUp, 
   ArrowRight, 
-  ShieldAlert,
   Cpu,
   Terminal,
   Activity,
-  Filter,
-  Layers,
-  Monitor,
-  CheckCircle2,
-  VideoOff,
   PlayCircle,
-  Clock,
-  VolumeX,
-  Volume2,
+  VideoOff,
   RefreshCw,
   Globe,
   Database,
   BarChart3,
   Sparkles,
-  Link2
+  Link2,
+  VolumeX,
+  Volume2
 } from 'lucide-react';
-import { AdOffer, AdType, User, Transaction, AdProvider } from '../types';
+import { AdOffer, AdType, User, Transaction } from '../types';
 import { MOCK_OFFERS } from '../services/mockDataService';
 import { optimizeAdMediation, getAIEarningsAdvice } from '../services/geminiService';
 
-// Isolated Ad Player
 const AdPlayer: React.FC<{
   offer: AdOffer;
   onComplete: (offer: AdOffer) => void;
@@ -114,9 +107,12 @@ const AdPlayer: React.FC<{
              </div>
              <div>
                 <h3 className="font-black text-white text-base tracking-tight mb-0.5">{offer.title}</h3>
-                <p className="text-[8px] text-blue-300 font-black uppercase tracking-[0.2em]">
-                  {offer.providerId} {!useSimulation ? 'CDN_LIVE' : 'VIRTUAL_AUCTION'}
-                </p>
+                <div className="flex items-center gap-1.5">
+                  <Link2 size={10} className="text-blue-400" />
+                  <p className="text-[8px] text-blue-300 font-black uppercase tracking-[0.2em]">
+                    {offer.providerId} {!useSimulation ? 'CDN_LIVE' : 'VIRTUAL_AUCTION'}
+                  </p>
+                </div>
              </div>
            </div>
            <div className="text-right">
@@ -262,16 +258,23 @@ const Dashboard: React.FC<DashboardProps> = ({ user, setUser, setTransactions, o
   const [loading, setLoading] = useState(true);
   const [activeOffer, setActiveOffer] = useState<AdOffer | null>(null);
   const [selectedType, setSelectedType] = useState<AdType | 'ALL'>('ALL');
-  const [aiInsight, setAiInsight] = useState<string>("Analyzing market conditions...");
+  const [aiInsight, setAiInsight] = useState<string>("Analyzing local market conditions...");
+  const initialFetchDone = useRef(false);
 
   useEffect(() => {
+    if (initialFetchDone.current) return;
+    
     const fetchOptimizedAds = async () => {
       setLoading(true);
-      const optimized = await optimizeAdMediation(MOCK_OFFERS);
-      setOffers(optimized);
-      setLoading(false);
-      const insight = await getAIEarningsAdvice(user);
-      setAiInsight(insight);
+      try {
+        const optimized = await optimizeAdMediation(MOCK_OFFERS);
+        setOffers(optimized);
+        const insight = await getAIEarningsAdvice(user);
+        setAiInsight(insight);
+      } finally {
+        setLoading(false);
+        initialFetchDone.current = true;
+      }
     };
     fetchOptimizedAds();
   }, [user]);
@@ -323,25 +326,25 @@ const Dashboard: React.FC<DashboardProps> = ({ user, setUser, setTransactions, o
             <span className="text-[9px] font-black uppercase tracking-widest text-white">Neural Auctioneer v4.2</span>
           </div>
           <div className="space-y-4">
-            <h2 className="text-5xl md:text-6xl font-black text-white leading-tight tracking-tighter">
+            <h2 className="text-4xl md:text-5xl font-black text-white leading-tight tracking-tighter">
               Yield <br/><span className="text-blue-200 italic">Unlimited.</span>
             </h2>
-            <p className="text-blue-100/70 text-base md:text-lg font-medium max-w-md mx-auto lg:mx-0">
+            <p className="text-blue-100/70 text-base font-medium max-w-md mx-auto lg:mx-0">
               Programmatic auctions optimized by Gemini. <br className="hidden md:block"/> Real-time liquidity, zero friction.
             </p>
           </div>
         </div>
         
-        <div className="bg-slate-950/40 backdrop-blur-3xl p-8 md:p-10 rounded-3xl border border-white/10 text-center shadow-xl min-w-[300px] relative z-10">
+        <div className="bg-slate-950/40 backdrop-blur-3xl p-8 md:p-10 rounded-3xl border border-white/10 text-center shadow-xl min-w-[280px] relative z-10">
             <p className="text-[10px] font-black text-blue-200 uppercase tracking-widest mb-6 opacity-60">Vault Ledger</p>
             <div className="flex items-baseline justify-center gap-4">
-              <h3 className="text-6xl md:text-7xl font-black text-white tracking-tighter">{user.balance.toLocaleString()}</h3>
+              <h3 className="text-5xl md:text-6xl font-black text-white tracking-tighter">{user.balance.toLocaleString()}</h3>
               <Zap className="w-6 h-6 text-yellow-500 fill-yellow-500" />
             </div>
             <div className="mt-8 space-y-3">
               <div className="flex items-center justify-center gap-4 text-[9px] font-black text-white/40 uppercase tracking-widest italic">
                  <div className="h-px w-6 bg-white/10"></div>
-                 Encrypted Session Vault
+                 Session Vault
                  <div className="h-px w-6 bg-white/10"></div>
               </div>
               <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">+{(user.totalEarned * 0.05).toFixed(0)} Yield Bonus</p>
@@ -368,7 +371,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, setUser, setTransactions, o
                </div>
                <h3 className="text-2xl font-black text-white tracking-tighter">Inventory Pipeline</h3>
              </div>
-             <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest ml-12">Real-time programmatic bidding stream</p>
+             <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest ml-12 italic">Programmatic bidding stream...</p>
            </div>
            
            <div className="flex bg-slate-900/80 backdrop-blur-3xl p-1 rounded-2xl border border-white/5 shadow-xl">
@@ -381,8 +384,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user, setUser, setTransactions, o
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loading ? (
             <div className="col-span-full py-32 flex flex-col items-center gap-6">
-              <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
-              <p className="text-white font-black tracking-widest text-[10px] uppercase">Running Auction Mediation...</p>
+              <Loader2 className="w-10 h-10 text-blue-500 animate-spin" />
+              <p className="text-white font-black tracking-widest text-[9px] uppercase">Mediating Bids...</p>
             </div>
           ) : filteredOffers.map((offer) => (
             <OfferCard key={offer.id} offer={offer} onLaunch={setActiveOffer} />
@@ -393,16 +396,5 @@ const Dashboard: React.FC<DashboardProps> = ({ user, setUser, setTransactions, o
     </div>
   );
 };
-
-const StatsMiniCard: React.FC<{ label: string; value: string; sub: string; icon: React.ReactNode }> = ({ label, value, sub, icon }) => (
-  <div className="glass-card bg-slate-900/40 border-white/5 rounded-2xl p-6 flex items-center gap-4 hover:-translate-y-1 transition-all">
-    <div className="w-12 h-12 bg-slate-950 rounded-xl flex items-center justify-center border border-white/10 shadow-inner group-hover:scale-105 transition-transform shrink-0">{icon}</div>
-    <div className="min-w-0">
-      <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-0.5 truncate">{label}</p>
-      <h5 className="text-xl font-black text-white tracking-tighter leading-none">{value}</h5>
-      <p className="text-[8px] font-black text-blue-400/60 uppercase tracking-widest truncate">{sub}</p>
-    </div>
-  </div>
-);
 
 export default Dashboard;

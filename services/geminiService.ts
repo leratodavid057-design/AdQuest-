@@ -8,8 +8,6 @@ import { AdOffer, User } from "../types";
  * based on regional CPM, provider reliability, and fill rates.
  */
 export const optimizeAdMediation = async (availableOffers: AdOffer[]): Promise<AdOffer[]> => {
-  console.debug("[AI Mediation] Starting auction for current user session...");
-  
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   try {
@@ -31,7 +29,6 @@ export const optimizeAdMediation = async (availableOffers: AdOffer[]): Promise<A
     const selectedIds: string[] = JSON.parse(response.text || "[]");
     const optimized = availableOffers.filter(offer => selectedIds.includes(offer.id));
     
-    console.debug(`[AI Mediation] Auction complete. Selected ${optimized.length} high-yield providers.`);
     return optimized.length > 0 ? optimized : availableOffers.slice(0, 5);
   } catch (error) {
     console.error("[AI Mediation Error] Falling back to standard waterfall:", error);
