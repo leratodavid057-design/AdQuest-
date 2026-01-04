@@ -1,0 +1,9 @@
+{
+  "name": "AdQuest: High-Yield Revenue Core",
+  "description": "Enterprise-grade rewarded ads platform with AI-driven CPM optimization and quantum session verification.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
